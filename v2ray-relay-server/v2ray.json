@@ -1,0 +1,72 @@
+{
+  "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 1000,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth",
+        "udp": true
+      }
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": 2000,
+      "protocol": "http",
+      "settings": {}
+    },
+    {
+      "listen": "0.0.0.0",
+      "port": 8000,
+      "protocol": "shadowsocks",
+      "settings": {
+        "password": "<RELAY-PASSWORD>",
+        "method": "chacha20-ietf-poly1305",
+        "network": "tcp,udp"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "shadowsocks",
+      "settings": {
+        "servers": [
+          {
+            "password": "<UPSTREAM-PASSWORD>",
+            "address": "<UPSTREAM-IP>",
+            "port": 8000,
+            "method": "chacha20-ietf-poly1305"
+          }
+        ]
+      }
+    },
+    {
+      "protocol": "freedom",
+      "tag": "freedom"
+    }
+  ],
+  "dns": {
+    "servers": [
+      "8.8.8.8",
+      "8.8.4.4",
+      "localhost"
+    ]
+  },
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "settings": {
+      "rules": [
+        {
+          "type": "field",
+          "outboundTag": "freedom",
+          "domain": [
+            "regexp:.*\\.ir$"
+          ]
+        }
+      ]
+    }
+  },
+  "log": {
+    "loglevel": "warning"
+  }
+}

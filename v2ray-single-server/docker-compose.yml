@@ -1,0 +1,10 @@
+services:
+  v2ray:
+    image: ghcr.io/v2fly/v2ray:v5.16.1
+    container_name: v2ray
+    restart: always
+    network_mode: "host"
+    environment:
+      - v2ray.vmess.aead.forced=false
+    volumes:
+      - ./v2ray.json:/etc/v2ray/config.json

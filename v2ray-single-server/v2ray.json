@@ -1,0 +1,137 @@
+{
+  "log": {
+    "loglevel": "info"
+  },
+  "dns": {
+    "servers": [
+      "fakedns",
+      "94.140.14.14",
+      "94.140.14.15"
+    ],
+    "queryStrategy": "UseIP"
+  },
+  "fakedns": [
+    {
+      "ipPool": "198.18.0.0/15",
+      "poolSize": 65535
+    }
+  ],
+  "inbounds": [
+    {
+      "listen": "0.0.0.0",
+      "port": 27015,
+      "protocol": "shadowsocks",
+      "tag": "ss-in",
+      "settings": {
+        "password": "<UPSTREAM-PASSWORD>",
+        "method": "chacha20-ietf-poly1305",
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "quic", "fakedns"]
+      }
+    },
+    {
+      "listen": "0.0.0.0",
+      "port": 27080,
+      "protocol": "socks",
+      "tag": "socks-in",
+      "settings": {
+        "auth": "password",
+        "accounts": [
+          {
+            "user": "<UPSTREAM-USER>",
+            "pass": "<UPSTREAM-PASSWORD>"
+          }
+        ],
+        "udp": true
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "quic", "fakedns"]
+      }
+    },
+    {
+      "listen": "0.0.0.0",
+      "port": 22,
+      "protocol": "http",
+      "tag": "http-in",
+      "settings": {
+        "auth": "password",
+        "accounts": [
+          {
+            "user": "<UPSTREAM-USER>",
+            "pass": "<UPSTREAM-PASSWORD>"
+          }
+        ],
+        "allowTransparent": false
+        // "userLevel": 0
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "quic", "fakedns"]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "tag": "freedom"
+    }
+  ],
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": ["socks-in", "http-in", "ss-in"],
+        "outboundTag": "freedom"
+      }
+    ]
+  },
+"policy": {
+  "levels": {
+    "0": {
+      "handshake": 4,
+      "connIdle": 300,
+      "uplinkOnly": 2,
+      "downlinkOnly": 5,
+      "statsUserUplink": true,
+      "statsUserDownlink": true,
+      "bufferSize": 10240
+    }
+  },
+  "system": {
+    "statsInboundUplink": true,
+    "statsInboundDownlink": true
+  },
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+    {
+      "type": "field",
+      "inboundTag": ["socks-in", "http-in", "ss-in"],
+      "outboundTag": "freedom"
+    },
+    {
+      "type": "field",
+      "port": "53",
+      "outboundTag": "block",
+      "enabled": true
+    },
+    {
+      "type": "field",
+      "ip": [
+        "8.8.8.8",
+        "8.8.4.4",
+        "1.1.1.1",
+        "1.0.0.1",
+        "9.9.9.9"
+      ],
+      "outboundTag": "block"
+    }
+   ]
+  }
+ }
+}
